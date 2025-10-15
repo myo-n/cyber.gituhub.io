@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>彦根市 救急出動 週間予報（MVP）</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- 祝日判定: holiday-jp（CDN） -->
+  <script src="https://unpkg.com/holiday-jp@1.0.11/dist/holiday-jp.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>彦根市 救急出動 週間予報（MVP）</h1>
+    <p class="sub">JMAの気温予報＋日次履歴から予測（負の二項/ポアソンGLMの係数を利用）</p>
+  </header>
+
+  <section class="controls">
+    <label>
+      予報区コード（JMA）
+      <input id="areaCode" value="250000" />
+    </label>
+    <label>
+      開始日
+      <input id="startDate" type="date" />
+    </label>
+    <label>
+      日数
+      <input id="horizon" type="number" min="1" max="14" value="7" />
+    </label>
+    <button id="runBtn">予報を更新</button>
+    <span id="status"></span>
+  </section>
+
+  <section class="cards">
+    <div class="card">
+      <h2>週合計 予測</h2>
+      <table id="weeklyTbl">
+        <thead><tr><th>週</th><th>予測件数</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>日次 予測</h2>
+      <table id="dailyTbl">
+        <thead>
+          <tr>
+            <th>日付</th><th>tmin</th><th>tmax</th>
+            <th>祝日</th><th>雨</th><th>雪</th><th>予測</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <small>※ 雨/雪はMVPでは0固定（後で降水APIに接続）。履歴は <code>history.json</code> から読み込み。</small>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

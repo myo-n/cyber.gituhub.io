@@ -16,14 +16,21 @@
     return x;
   };
 
-  // 祝日・土日
-  function isHolidayJP(date) {
-    try {
-      const w = date.getDay();
-      const isHol = window.holiday_jp.isHoliday(new Date(iso(date)));
-      return w === 0 || w === 6 || isHol;
-    } catch { return false; }
+// 土日祝日フラグ（ローカル日付で判定）
+function isHolidayJP(date) {
+  try {
+    // ローカルの 00:00 に正規化（UTCズレ対策）
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const w = d.getDay(); // 0=日, 6=土
+    const isNatHol = window.holiday_jp?.isHoliday
+      ? window.holiday_jp.isHoliday(d)
+      : false;
+    return w === 0 || w === 6 || isNatHol;
+  } catch {
+    return false;
   }
+}
+
 
   // -------- JMA fetch（1時間キャッシュ） --------
   async function fetchJMA(areaCode, ttlMs = 60 * 60 * 1000) {

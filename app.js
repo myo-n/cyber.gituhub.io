@@ -244,7 +244,7 @@ async function runForecast() {
       tb.appendChild(tr);
     });
 
-    $("#status").textContent = "OK（明日から7日）";
+    $("#status").textContent = "";
   } catch (e) {
     console.error(e);
     $("#status").textContent = "エラー: " + e.message;

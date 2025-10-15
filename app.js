@@ -46,22 +46,32 @@
     return payload;
   }
 
-  // JMA JSON → 日別 tmin/tmax
-  function extractDailyTemps(jmaJson) {
-    const tsArr = jmaJson?.[0]?.timeSeries || [];
-    for (const ts of tsArr) {
-      const areas = ts.areas;
-      if (!areas || !ts.timeDefines) continue;
-      const dates = ts.timeDefines.map((t) => new Date(t));
-      const a0 = areas[0] || {};
-      if (a0.tempsMin || a0.tempsMax) {
-        const tmin = (a0.tempsMin || []).map((v) => (v === "" ? null : Number(v)));
-        const tmax = (a0.tempsMax || []).map((v) => (v === "" ? null : Number(v)));
-        return dates.map((d, i) => ({ date: d, tmin: tmin[i] ?? null, tmax: tmax[i] ?? null }));
-      }
+// --- JMA forecast JSONから日別tmin/tmaxを抽出（彦根固定 60131） ---
+function extractDailyTemps(jmaJson) {
+  const preferCode = "60131"; // 彦根地点コード固定
+  // すべてのトップレベルブロックを走査
+  for (const root of jmaJson) {
+    for (const ts of root.timeSeries || []) {
+      const areas = ts.areas || [];
+      const hit = areas.find(a => a.tempsMin || a.tempsMax);
+      if (!hit) continue;
+
+      // 彦根(60131)優先、なければ最初のエリア
+      const area = areas.find(a => a.area?.code === preferCode) || hit;
+
+      const dates = (ts.timeDefines || []).map(t => new Date(t));
+      const tmin = (area.tempsMin || []).map(v => v === "" ? null : Number(v));
+      const tmax = (area.tempsMax || []).map(v => v === "" ? null : Number(v));
+
+      return dates.map((d, i) => ({
+        date: d,
+        tmin: tmin[i] ?? null,
+        tmax: tmax[i] ?? null
+      }));
     }
-    throw new Error("No daily temps in JMA payload");
   }
+  throw new Error("No daily temps (彦根) found in JMA payload");
+}
 
   // -------- 特徴量（lagは後で入れる） --------
   function baseFeatures(rows) {

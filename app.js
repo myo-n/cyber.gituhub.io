@@ -149,15 +149,17 @@ function extractDailyTemps(jmaJson) {
     try {
       $("#status").textContent = "取得中…";
       const areaCode = $("#areaCode").value.trim();
-      const start = new Date($("#startDate").value);
-      const horizon = Math.max(1, Math.min(14, Number($("#horizon").value)));
+    const start = new Date(); // 今日
+    $("#startDate").value = start.toISOString().slice(0,10); // UI表示も更新
 
-      const jmaRaw = await fetchJMA(areaCode, 60 * 60 * 1000);
-      const temps = extractDailyTemps(jmaRaw)
-        .filter((r) => r.date >= start && r.date < new Date(start.getTime() + horizon * 86400000))
-        .sort((a, b) => a.date - b.date);
+    const horizon = Math.max(1, Math.min(14, Number($("#horizon").value)));
 
-      const feats0 = baseFeatures(temps);
+    // 彦根固定（県予報コード）
+    const jmaRaw = await fetchJMA("250000", 60 * 60 * 1000);
+    const temps = extractDailyTemps(jmaRaw)
+      .filter(r => r.date >= start && r.date < new Date(start.getTime() + horizon * 86400000))
+      .sort((a, b) => a.date - b.date);
+
 
       // 初期の7日ラグを季節ベースラインで埋める
       let prev7 = [];
